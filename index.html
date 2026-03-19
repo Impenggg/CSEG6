@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Galactic Defender</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="frame">
+      <header class="topbar">
+        <div class="title">
+          <span class="logo">GALACTIC DEFENDER</span>
+          <span class="tag">Mana MOBA Shooter</span>
+        </div>
+        <div class="help">
+          <div><kbd>A</kbd>/<kbd>D</kbd> or <kbd>←</kbd>/<kbd>→</kbd> Move</div>
+          <div><kbd>Space</kbd> Shoot</div>
+          <div><kbd>Q</kbd> Snare · <kbd>W</kbd> Dash · <kbd>E</kbd> Burst · <kbd>R</kbd> Ultimate</div>
+          <div><kbd>Enter</kbd> Start/Restart · <kbd>P</kbd> Pause</div>
+        </div>
+      </header>
+
+      <main class="stage">
+        <canvas id="game" width="960" height="540" aria-label="Galactic Defender game canvas"></canvas>
+        <div id="overlay" class="overlay" aria-live="polite"></div>
+      </main>
+
+      <footer class="bottombar">
+        <div class="hint">
+          Tip: Mana is gained on <strong>hit</strong> (not kill). Ultimate requires <strong>full mana</strong>.
+        </div>
+        <div class="credits">
+          Built with HTML5 Canvas + vanilla JS
+        </div>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
