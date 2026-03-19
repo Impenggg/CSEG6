@@ -55,12 +55,26 @@ class Player {
 
     const left = input.isDown(KEYS.left);
     const right = input.isDown(KEYS.right);
+    const up = input.isDown(KEYS.up);
+    const down = input.isDown(KEYS.down);
 
     let vx = 0;
+    let vy = 0;
     if (left) vx -= 1;
     if (right) vx += 1;
+    if (up) vy -= 1;
+    if (down) vy += 1;
+
+    if (vx !== 0 && vy !== 0) {
+      const diagonalScale = Math.SQRT1_2;
+      vx *= diagonalScale;
+      vy *= diagonalScale;
+    }
+
     this.x += vx * this.speed * dt;
+    this.y += vy * this.speed * dt;
     this.x = clamp(this.x, this.w / 2 + 12, gc.w - this.w / 2 - 12);
+    this.y = clamp(this.y, this.h / 2 + 12, gc.h - this.h / 2 - 12);
 
     // shooting
     this.fireCooldown = Math.max(0, this.fireCooldown - dt);
@@ -160,6 +174,7 @@ class Player {
     this.invuln = 0.75;
     gc.camera.add(7, 0.25);
     gc.spawnExplosion(this.x, this.y, COLORS.playerThruster, 18);
+    gc.audio.playSound("playerHit");
     if (this.hp <= 0) {
       this.lives -= 1;
       if (this.lives >= 0) {
@@ -167,6 +182,7 @@ class Player {
         this.invuln = 1.2;
         gc.camera.add(12, 0.4);
         gc.spawnExplosion(this.x, this.y, COLORS.player, 30);
+        gc.audio.playSound("explosion");
       }
     }
   }

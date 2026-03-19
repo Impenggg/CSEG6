@@ -1,13 +1,15 @@
 export const KEYS = {
   left: ["ArrowLeft", "a", "A"],
   right: ["ArrowRight", "d", "D"],
+  up: ["ArrowUp", "w", "W"],
+  down: ["ArrowDown", "s", "S"],
   shoot: [" "],
+  dash: ["Shift"],
   q: ["q", "Q"],
-  w: ["w", "W"],
   e: ["e", "E"],
   r: ["r", "R"],
   enter: ["Enter"],
-  pause: ["p", "P"],
+  pause: ["p", "P", "Escape"],
 };
 
 export const COLORS = {

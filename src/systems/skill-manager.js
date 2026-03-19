@@ -6,8 +6,8 @@ class SkillManager {
   constructor(gc) {
     this.gc = gc;
     this.cooldowns = {
+      dash: 0,
       q: 0,
-      w: 0,
       e: 0,
       r: 0,
     };
@@ -58,8 +58,8 @@ class SkillManager {
   hudInfo() {
     const m = this.gc.mana.value;
     return {
+      dash: { cost: 15, cd: this.cooldowns.dash, ready: this.cooldowns.dash <= 0 && m >= 15 },
       q: { cost: 20, cd: this.cooldowns.q, ready: this.cooldowns.q <= 0 && m >= 20 },
-      w: { cost: 15, cd: this.cooldowns.w, ready: this.cooldowns.w <= 0 && m >= 15 },
       e: { cost: 30, cd: this.cooldowns.e, ready: this.cooldowns.e <= 0 && m >= 30 },
       r: { cost: 60, cd: this.cooldowns.r, ready: this.cooldowns.r <= 0 && this.gc.mana.isFull() },
     };
@@ -86,12 +86,13 @@ class SkillManager {
     );
 
     this.gc.spawnText(this.gc.player.x, this.gc.player.y - 40, "ION SNARE", "rgba(101,240,255,0.95)");
+    this.gc.audio.playSound("snare");
   }
 
-  tryCastW() {
-    if (this.cooldowns.w > 0) return;
+  tryCastDash() {
+    if (this.cooldowns.dash > 0) return;
     if (!this.gc.mana.spend(15)) return;
-    this.cooldowns.w = 4.8;
+    this.cooldowns.dash = 4.8;
 
     // Phase Dash: instant horizontal dash with brief invuln and afterimages.
     const input = this.gc.input;
@@ -117,6 +118,7 @@ class SkillManager {
     this.gc.spawnText(this.gc.player.x, this.gc.player.y - 40, "PHASE DASH", "rgba(255,79,216,0.95)");
     this.gc.camera.add(8, 0.16);
     this.gc.spawnBurst(this.gc.player.x, this.gc.player.y, "rgba(255,79,216,0.95)");
+    this.gc.audio.playSound("dash");
   }
 
   tryCastE() {
@@ -128,6 +130,7 @@ class SkillManager {
     this.burstWave = { x: this.gc.player.x, y: this.gc.player.y, r: 6, maxR: 210, t: 0, life: 0.65 };
     this.gc.camera.add(18, 0.35);
     this.gc.spawnText(this.gc.player.x, this.gc.player.y - 44, "PLASMA BURST", "rgba(255,209,102,0.95)");
+    this.gc.audio.playSound("burst");
 
     // Immediate effect: clear enemy bullets close to player.
     const px = this.gc.player.x;
@@ -183,6 +186,7 @@ class SkillManager {
 
     this.gc.spawnText(this.gc.w / 2, 90, "NOVA PROTOCOL", "rgba(199,125,255,0.98)");
     this.gc.camera.add(24, 0.6);
+    this.gc.audio.playSound("ultimate");
   }
 
   castUltimatePulse() {
@@ -190,6 +194,7 @@ class SkillManager {
     const u = this.ultimate;
     u.pulseIndex += 1;
     this.hardLock = Math.max(this.hardLock, 0.15);
+    this.gc.audio.playSound("ultimateExplosion");
 
     // Rain strikes across screen: pick columns and strike down.
     const strikes = 6;

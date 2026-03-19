@@ -8,15 +8,17 @@ import { Particle } from "../entities/particle.js";
 import { Player } from "../entities/player.js";
 import { PowerUp } from "../entities/power-up.js";
 import { Projectile } from "../entities/projectile.js";
+import { AudioManager } from "../systems/audio-manager.js";
 import { SkillManager } from "../systems/skill-manager.js";
 import { Starfield } from "../systems/starfield.js";
 import { chance, clamp, rand } from "../utils/math.js";
 
 class GameController {
-  constructor(canvas, overlayEl) {
+  constructor(canvas, overlayEl, audio = new AudioManager()) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.overlayEl = overlayEl;
+    this.audio = audio;
     this.w = canvas.width;
     this.h = canvas.height;
     this.input = new Input();
@@ -71,11 +73,14 @@ class GameController {
     this.spawnGrace = 1.2;
     this.spawnWave();
     this.updateOverlay();
+    this.audio.playBgm();
   }
 
   togglePause() {
     if (this.state === "playing") this.state = "paused";
     else if (this.state === "paused") this.state = "playing";
+    if (this.state === "paused") this.audio.pauseBgm();
+    if (this.state === "playing") this.audio.resumeBgm();
     this.updateOverlay();
   }
 
@@ -89,12 +94,12 @@ class GameController {
           <div class="big">PRESS ENTER</div>
           <div class="sub">
             Defend Earth sector-by-sector. Earn mana by <strong>hitting</strong> enemies.<br/>
-            Use <strong>Q/W/E</strong> tactically and unleash <strong>R</strong> only at <strong>full mana</strong>.
+            Use <strong>Shift/Q/E</strong> tactically and unleash <strong>R</strong> only at <strong>full mana</strong>.
           </div>
           <div class="row">
             <span><kbd>Space</kbd> Plasma</span>
+            <span><kbd>Shift</kbd> Dash invuln</span>
             <span><kbd>Q</kbd> Slow + cancel dives</span>
-            <span><kbd>W</kbd> Dash invuln</span>
             <span><kbd>E</kbd> Shockwave</span>
             <span><kbd>R</kbd> Orbital strikes</span>
           </div>
@@ -104,7 +109,7 @@ class GameController {
       el.innerHTML = `
         <div class="panel">
           <div class="big">PAUSED</div>
-          <div class="sub">Press <kbd>P</kbd> to resume.</div>
+          <div class="sub">Press <kbd>P</kbd> or <kbd>Esc</kbd> to resume.</div>
         </div>
       `;
     } else if (this.state === "gameover") {
@@ -201,6 +206,7 @@ class GameController {
     }
 
     this.spawnSpark(x, y, "rgba(101,240,255,0.9)");
+    this.audio.playSound("playerShoot");
   }
 
   spawnExplosion(x, y, color, intensity) {
@@ -355,15 +361,17 @@ class GameController {
             this.skillManager.onSnareHit(s.x, s.y);
           }
 
-          if (this.boss.hp <= 0) {
-            this.boss.alive = false;
-            this.score += 1500 + this.waveIndex * 80;
-            this.spawnExplosion(this.boss.x, this.boss.y, COLORS.enemyBoss, 60);
-            this.camera.add(24, 0.6);
-            this.maybeDropPowerUp(this.boss.x, this.boss.y);
+            if (this.boss.hp <= 0) {
+              this.boss.alive = false;
+              this.score += 1500 + this.waveIndex * 80;
+              this.spawnExplosion(this.boss.x, this.boss.y, COLORS.enemyBoss, 60);
+              this.camera.add(24, 0.6);
+              this.maybeDropPowerUp(this.boss.x, this.boss.y);
+              this.audio.playSound("enemyDie");
+              this.audio.playSound("explosion");
+            }
+            continue;
           }
-          continue;
-        }
       }
 
       for (const e of this.enemies) {
@@ -384,14 +392,16 @@ class GameController {
             this.skillManager.onSnareHit(s.x, s.y);
           }
 
-          if (e.hp <= 0) {
-            e.alive = false;
-            this.score += e.type === "elite" ? 120 : 60;
-            this.spawnExplosion(e.x, e.y, e.getColor(), e.type === "elite" ? 18 : 12);
-            this.maybeDropPowerUp(e.x, e.y);
+            if (e.hp <= 0) {
+              e.alive = false;
+              this.score += e.type === "elite" ? 120 : 60;
+              this.spawnExplosion(e.x, e.y, e.getColor(), e.type === "elite" ? 18 : 12);
+              this.maybeDropPowerUp(e.x, e.y);
+              this.audio.playSound("enemyDie");
+              this.audio.playSound("explosion");
+            }
+            break;
           }
-          break;
-        }
       }
     }
 
@@ -409,12 +419,14 @@ class GameController {
     // enemies -> player collision (rare but possible)
     for (const e of this.enemies) {
       if (!e.alive) continue;
-      if (GameController.rectRectOverlap(pr, e.bounds())) {
-        e.alive = false;
-        this.spawnExplosion(e.x, e.y, e.getColor(), 18);
-        this.player.takeHit(12, this);
+        if (GameController.rectRectOverlap(pr, e.bounds())) {
+          e.alive = false;
+          this.spawnExplosion(e.x, e.y, e.getColor(), 18);
+          this.audio.playSound("enemyDie");
+          this.audio.playSound("explosion");
+          this.player.takeHit(12, this);
+        }
       }
-    }
     if (this.boss && this.boss.alive) {
       if (GameController.rectRectOverlap(pr, this.boss.bounds())) {
         this.player.takeHit(22, this);
@@ -494,8 +506,8 @@ class GameController {
     this.spawnGrace = Math.max(0, this.spawnGrace - dt);
 
     // skills
+    if (this.input.wasPressed(KEYS.dash)) this.skillManager.tryCastDash();
     if (this.input.wasPressed(KEYS.q)) this.skillManager.tryCastQ();
-    if (this.input.wasPressed(KEYS.w)) this.skillManager.tryCastW();
     if (this.input.wasPressed(KEYS.e)) this.skillManager.tryCastE();
     if (this.input.wasPressed(KEYS.r)) this.skillManager.tryCastR();
 
@@ -573,13 +585,13 @@ class GameController {
 
     // Skill HUD (bottom center)
     const info = this.skillManager.hudInfo();
-    const keys = ["q", "w", "e", "r"];
-    const labels = {
-      q: "ION",
-      w: "DASH",
-      e: "BURST",
-      r: "NOVA",
-    };
+      const keys = ["dash", "q", "e", "r"];
+      const labels = {
+        dash: "DASH",
+        q: "ION",
+        e: "BURST",
+        r: "NOVA",
+      };
     const start = this.w / 2 - 150;
     const y = this.h - 44;
     for (let i = 0; i < keys.length; i++) {
@@ -602,7 +614,8 @@ class GameController {
       ctx.font = "800 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
-      ctx.fillText(k.toUpperCase(), box.x + 8, box.y + 6);
+        const hotkey = k === "dash" ? "SHIFT" : k.toUpperCase();
+        ctx.fillText(hotkey, box.x + 8, box.y + 6);
       ctx.textAlign = "right";
       ctx.fillText(labels[k], box.x + box.w - 8, box.y + 6);
 

@@ -1,4 +1,5 @@
 import { GameController } from "./game/game-controller.js";
+import { AudioManager } from "./systems/audio-manager.js";
 import { installCanvasPolyfills } from "./polyfills/canvas.js";
 import { clamp } from "./utils/math.js";
 
@@ -9,7 +10,10 @@ function main() {
 
   installCanvasPolyfills();
 
-  const gc = new GameController(canvas, overlay);
+  const audio = new AudioManager();
+  audio.setupUnlock();
+
+  const gc = new GameController(canvas, overlay, audio);
   let last = performance.now();
 
   const loop = (now) => {
