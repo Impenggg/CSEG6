@@ -1,0 +1,31 @@
+export const KEYS = {
+  left: ["ArrowLeft", "a", "A"],
+  right: ["ArrowRight", "d", "D"],
+  up: ["ArrowUp", "w", "W"],
+  down: ["ArrowDown", "s", "S"],
+  shoot: [" "],
+  dash: ["Shift"],
+  q: ["q", "Q"],
+  e: ["e", "E"],
+  r: ["r", "R"],
+  enter: ["Enter"],
+  pause: ["p", "P", "Escape"],
+};
+
+export const COLORS = {
+  player: "#65f0ff",
+  playerCore: "#d9ffff",
+  playerThruster: "#ff4fd8",
+  shot: "#65f0ff",
+  shotHot: "#ffd166",
+  enemySmall: "#ff4d4d",
+  enemyElite: "#ff9f1c",
+  enemyBoss: "#c77dff",
+  enemyBullet: "#ff6b6b",
+  powerUp: "#7dff6b",
+  uiDim: "rgba(233,236,255,0.7)",
+  ui: "rgba(233,236,255,0.92)",
+  mana: "#4dd7ff",
+  hp: "#7dff6b",
+  shield: "#65f0ff",
+};
