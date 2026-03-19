@@ -1,0 +1,64 @@
+.frame {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.topbar,
+.bottombar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.bottombar {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: none;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.logo {
+  letter-spacing: 0.2em;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.tag {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.help {
+  display: grid;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.hint,
+.credits {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.hint strong {
+  color: rgba(233, 236, 255, 0.92);
+}
