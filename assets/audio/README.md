@@ -20,8 +20,12 @@ Drop your game audio files in this folder. The game will try to load these filen
   Played on every ultimate pulse.
 - `player-hit.mp3`
   Sound when the player takes damage.
+- `player-get-buff.mp3`
+  Played when the player picks up a buff or extra life.
 - `enemy-die.mp3`
   Played when an enemy or boss dies.
+- `lose.mp3`
+  Played when the run ends in a loss.
 - `explosion.mp3`
   Enemy or ship explosion sound.
 

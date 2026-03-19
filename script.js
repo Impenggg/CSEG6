@@ -804,7 +804,9 @@
           ultimate: { src: "./assets/audio/ultimate.mp3", volume: 0.5 },
           ultimateExplosion: { src: "./assets/audio/ultimate-explosion.mp3", volume: 0.45 },
           playerHit: { src: "./assets/audio/player-hit.mp3", volume: 0.4 },
+          playerGetBuff: { src: "./assets/audio/player-get-buff.mp3", volume: 0.4 },
           enemyDie: { src: "./assets/audio/enemy-die.mp3", volume: 0.35 },
+          lose: { src: "./assets/audio/lose.mp3", volume: 0.45 },
           explosion: { src: "./assets/audio/explosion.mp3", volume: 0.35 },
         },
       };
@@ -1325,6 +1327,7 @@
 
       this.spawnGrace = 0;
       this.loseBecauseEarth = false;
+      this.loseSoundPlayed = false;
 
       this.updateOverlay();
     }
@@ -1347,6 +1350,7 @@
       this.mana.reset();
       this.skillManager = new SkillManager(this);
       this.spawnGrace = 1.2;
+      this.loseSoundPlayed = false;
       this.spawnWave();
       this.updateOverlay();
       this.audio.playBgm();
@@ -1602,6 +1606,7 @@
         this.spawnText(this.player.x, this.player.y - 40, "SPEED BOOST", "rgba(255,79,216,0.95)");
       }
       this.spawnBurst(this.player.x, this.player.y, "rgba(233,236,255,0.85)");
+      this.audio.playSound("playerGetBuff");
     }
 
     static rectCircleOverlap(rect, cx, cy, cr) {
@@ -1726,6 +1731,11 @@
 
       if (this.player.lives < 0) {
         this.state = "gameover";
+        if (!this.loseSoundPlayed) {
+          this.loseSoundPlayed = true;
+          this.audio.pauseBgm();
+          this.audio.playSound("lose");
+        }
         this.updateOverlay();
         return;
       }
@@ -1736,6 +1746,11 @@
           if (e.alive && e.y + e.h / 2 >= this.earthLine) {
             this.loseBecauseEarth = true;
             this.state = "gameover";
+            if (!this.loseSoundPlayed) {
+              this.loseSoundPlayed = true;
+              this.audio.pauseBgm();
+              this.audio.playSound("lose");
+            }
             this.updateOverlay();
             return;
           }
@@ -1744,6 +1759,11 @@
           if (this.boss.y + this.boss.h / 2 >= this.earthLine) {
             this.loseBecauseEarth = true;
             this.state = "gameover";
+            if (!this.loseSoundPlayed) {
+              this.loseSoundPlayed = true;
+              this.audio.pauseBgm();
+              this.audio.playSound("lose");
+            }
             this.updateOverlay();
             return;
           }
@@ -1839,13 +1859,19 @@
       const hpX = 14;
       const hpY = this.h - 18;
       const hpW = 260;
-      ctx.fillStyle = "rgba(0,0,0,0.45)";
-      ctx.fillRect(hpX, hpY, hpW, 8);
-      ctx.fillStyle = COLORS.hp;
-      ctx.fillRect(hpX, hpY, hpW * hpT, 8);
+      const hpH = 8;
+      const hpLayers = Math.max(1, this.player.lives + 1);
+      for (let i = hpLayers - 1; i >= 0; i--) {
+        const layerY = hpY - i * 4;
+        const isActiveLayer = i === 0;
+        ctx.fillStyle = "rgba(0,0,0,0.45)";
+        ctx.fillRect(hpX, layerY, hpW, hpH);
+        ctx.fillStyle = isActiveLayer ? COLORS.hp : "rgba(125,255,107,0.28)";
+        ctx.fillRect(hpX, layerY, hpW * (isActiveLayer ? hpT : 1), hpH);
+      }
       ctx.fillStyle = "rgba(233,236,255,0.88)";
       ctx.font = "700 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
-      ctx.fillText(`HP`, hpX + hpW + 10, hpY - 2);
+      ctx.fillText(`HP x${hpLayers}`, hpX + hpW + 10, hpY - (hpLayers - 1) * 2 - 2);
 
       // Mana bar
       const mT = clamp(this.mana.value / this.mana.max, 0, 1);

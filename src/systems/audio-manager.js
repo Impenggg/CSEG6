@@ -14,7 +14,9 @@ class AudioManager {
         ultimate: { src: "./assets/audio/ultimate.mp3", volume: 0.5 },
         ultimateExplosion: { src: "./assets/audio/ultimate-explosion.mp3", volume: 0.45 },
         playerHit: { src: "./assets/audio/player-hit.mp3", volume: 0.4 },
+        playerGetBuff: { src: "./assets/audio/player-get-buff.mp3", volume: 0.4 },
         enemyDie: { src: "./assets/audio/enemy-die.mp3", volume: 0.35 },
+        lose: { src: "./assets/audio/lose.mp3", volume: 0.45 },
         explosion: { src: "./assets/audio/explosion.mp3", volume: 0.35 },
       },
     };
