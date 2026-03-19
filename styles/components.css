@@ -27,7 +27,7 @@ canvas#game {
   inset: 0;
   display: grid;
   place-items: center;
-  pointer-events: none;
+  pointer-events: auto;
   text-align: center;
   padding: 24px;
   color: var(--text);
@@ -35,7 +35,7 @@ canvas#game {
 }
 
 .overlay .panel {
-  pointer-events: none;
+  pointer-events: auto;
   width: min(720px, 92%);
   padding: 18px 18px 14px;
   border-radius: 16px;
@@ -66,4 +66,53 @@ canvas#game {
   flex-wrap: wrap;
   color: var(--muted);
   font-size: 12px;
+}
+
+.overlay .menu-buttons {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.overlay .btn {
+  pointer-events: auto;
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(233, 236, 255, 0.92);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.overlay .btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(101, 240, 255, 0.35);
+}
+
+.overlay .btn:active {
+  transform: translateY(0px);
+}
+
+.overlay .btn.primary {
+  border-color: rgba(101, 240, 255, 0.35);
+  background: rgba(101, 240, 255, 0.08);
+}
+
+.overlay .btn.danger {
+  border-color: rgba(255, 77, 77, 0.28);
+  background: rgba(255, 77, 77, 0.06);
+}
+
+.overlay .btn[aria-pressed="true"] {
+  border-color: rgba(125, 255, 107, 0.35);
+  background: rgba(125, 255, 107, 0.08);
 }

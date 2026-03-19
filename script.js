@@ -1329,7 +1329,30 @@
       this.loseBecauseEarth = false;
       this.loseSoundPlayed = false;
 
+      this.audio.setupUnlock();
+      this.bindOverlayUi();
       this.updateOverlay();
+    }
+
+    bindOverlayUi() {
+      if (!this.overlayEl) return;
+      this.overlayEl.addEventListener("click", (e) => {
+        const btn = e.target && e.target.closest ? e.target.closest("[data-action]") : null;
+        if (!btn) return;
+        const action = btn.getAttribute("data-action");
+        if (!action) return;
+        e.preventDefault();
+
+        if (action === "start") {
+          this.startNewRun();
+        } else if (action === "restart") {
+          this.startNewRun();
+        } else if (action === "audio") {
+          this.toggleAudio();
+        } else if (action === "exit") {
+          this.exitToMenu();
+        }
+      });
     }
 
     startNewRun() {
@@ -1356,6 +1379,31 @@
       this.audio.playBgm();
     }
 
+    exitToMenu() {
+      // "Exit" in a browser context returns to the title screen.
+      this.state = "title";
+      this.loseBecauseEarth = false;
+      this.loseSoundPlayed = false;
+      this.enemies = [];
+      this.boss = null;
+      this.playerProjectiles = [];
+      this.enemyProjectiles = [];
+      this.powerUps = [];
+      this.particles = [];
+      this.strikes = [];
+      this.floatText = [];
+      this.mana.reset();
+      this.audio.stopBgm();
+      this.updateOverlay();
+    }
+
+    toggleAudio() {
+      this.audio.enabled = !this.audio.enabled;
+      if (!this.audio.enabled) this.audio.stopBgm();
+      else if (this.state === "playing") this.audio.playBgm();
+      this.updateOverlay();
+    }
+
     togglePause() {
       if (this.state === "playing") this.state = "paused";
       else if (this.state === "paused") this.state = "playing";
@@ -1369,9 +1417,11 @@
       if (!el) return;
 
       if (this.state === "title") {
+        const audioOn = this.audio.enabled ? "true" : "false";
+        const audioLabel = this.audio.enabled ? "AUDIO: ON" : "AUDIO: OFF";
         el.innerHTML = `
           <div class="panel">
-            <div class="big">PRESS ENTER</div>
+            <div class="big">MAIN MENU</div>
             <div class="sub">
               Defend Earth sector-by-sector. Earn mana by <strong>hitting</strong> enemies.<br/>
               Use <strong>Shift/Q/E</strong> tactically and unleash <strong>R</strong> only at <strong>full mana</strong>.
@@ -1383,6 +1433,13 @@
               <span><kbd>E</kbd> Shockwave</span>
               <span><kbd>R</kbd> Orbital strikes</span>
             </div>
+            <div class="menu-buttons">
+              <button class="btn primary" data-action="start">START</button>
+              <button class="btn" data-action="restart">RESTART</button>
+              <button class="btn" data-action="audio" aria-pressed="${audioOn}">${audioLabel}</button>
+              <button class="btn danger" data-action="exit">EXIT</button>
+            </div>
+            <div class="row"><span>You can also press <kbd>Enter</kbd> to start.</span></div>
           </div>
         `;
       } else if (this.state === "paused") {
@@ -1390,6 +1447,12 @@
           <div class="panel">
             <div class="big">PAUSED</div>
             <div class="sub">Press <kbd>P</kbd> or <kbd>Esc</kbd> to resume.</div>
+            <div class="menu-buttons">
+              <button class="btn primary" data-action="start">RESUME</button>
+              <button class="btn" data-action="restart">RESTART</button>
+              <button class="btn" data-action="audio" aria-pressed="${this.audio.enabled ? "true" : "false"}">${this.audio.enabled ? "AUDIO: ON" : "AUDIO: OFF"}</button>
+              <button class="btn danger" data-action="exit">EXIT</button>
+            </div>
           </div>
         `;
       } else if (this.state === "gameover") {
@@ -1398,6 +1461,11 @@
           <div class="panel">
             <div class="big">GAME OVER</div>
             <div class="sub">${reason}<br/>Final Score: <strong>${Math.floor(this.score)}</strong></div>
+            <div class="menu-buttons">
+              <button class="btn primary" data-action="restart">RESTART</button>
+              <button class="btn" data-action="audio" aria-pressed="${this.audio.enabled ? "true" : "false"}">${this.audio.enabled ? "AUDIO: ON" : "AUDIO: OFF"}</button>
+              <button class="btn danger" data-action="exit">EXIT</button>
+            </div>
             <div class="row"><span>Press <kbd>Enter</kbd> to restart.</span></div>
           </div>
         `;
@@ -1406,6 +1474,11 @@
           <div class="panel">
             <div class="big">SECTOR CLEARED</div>
             <div class="sub">Earth survives another day.<br/>Final Score: <strong>${Math.floor(this.score)}</strong></div>
+            <div class="menu-buttons">
+              <button class="btn primary" data-action="restart">PLAY AGAIN</button>
+              <button class="btn" data-action="audio" aria-pressed="${this.audio.enabled ? "true" : "false"}">${this.audio.enabled ? "AUDIO: ON" : "AUDIO: OFF"}</button>
+              <button class="btn danger" data-action="exit">EXIT</button>
+            </div>
             <div class="row"><span>Press <kbd>Enter</kbd> to play again.</span></div>
           </div>
         `;
@@ -1792,6 +1865,9 @@
       }
       if (this.input.wasPressed(KEYS.enter) && (this.state === "title" || this.state === "gameover" || this.state === "victory")) {
         this.startNewRun();
+      }
+      if (this.input.wasPressed(KEYS.enter) && this.state === "paused") {
+        this.togglePause();
       }
 
       if (this.state !== "playing") {
